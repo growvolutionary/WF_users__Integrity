@@ -1,0 +1,31 @@
+{
+  "algorithm": "sha256",
+  "artifacts": {
+    "users_e2ee": {
+      "latest": "v1",
+      "path": "e2ee",
+      "versions": [
+        {
+          "file": "e2ee/v1.js",
+          "sha256": "c1c7acb24f5d304f9167327552834cc7140dfbafd87c0a4a1de31672a5bfdd0b",
+          "size": 23754,
+          "version": "v1"
+        }
+      ]
+    },
+    "users_session": {
+      "latest": "v1",
+      "path": "session",
+      "versions": [
+        {
+          "file": "session/v1.js",
+          "sha256": "7347dc8fe4ff90ea0d43b47c0f5bd01ee5357d54308df09e9dcbb7ce139e4132",
+          "size": 3642,
+          "version": "v1"
+        }
+      ]
+    }
+  },
+  "format": 2,
+  "normalization": "Hashes cover the content as stored in git: CRLF line endings count as LF."
+}
