@@ -76,13 +76,13 @@ export async function unlockVault(user) {
 
 export async function unlock() {
     const [e2ee, session] = await Promise.all([crypto(), state()])
-    if (!session?.share || !session.handshake) {
+    if (!session?.share || !session.binding) {
         if (session && !session.device && await unlockVault(session.user_id)) return session
         await e2ee.reset()
         return session
     }
 
-    await e2ee.unlock({ share: session.share, handshake: session.handshake, user: session.user_id })
+    await e2ee.unlock({ share: session.share, binding: session.binding, user: session.user_id })
     return session
 }
 

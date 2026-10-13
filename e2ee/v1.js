@@ -33,6 +33,8 @@ const KEYLOG_SUBJECT = "wf-keylog-v1:subject"
 const KEYLOG_AUTHORITY = "wf-keylog-v1:authority"
 const COMMIT_CONTEXT = "users-recovery-commit-v1"
 const QR_SCHEME = "users-sdk"
+const QR_VERSION = "2"
+const QR_SCRIPTS = [["users_e2ee", "e2ee"], ["users_session", "session"]]
 const BASE32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
 const PKCS8_ED25519 = Uint8Array.from([0x30, 0x2e, 0x02, 0x01, 0x00, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65, 0x70, 0x04, 0x22, 0x04, 0x20])
 
@@ -285,32 +287,32 @@ async function next(state, data) {
     return { seq: data.seq, head: await sha256(canonical(data)) }
 }
 
-async function sessionKey(share, handshake, usage) {
+async function sessionKey(share, binding, usage) {
     const material = await subtle.importKey("raw", decode(share), "HKDF", false, ["deriveKey"])
     return subtle.deriveKey(
-        { name: "HKDF", hash: "SHA-256", salt: encoder.encode(handshake), info: encoder.encode(SESSION_INFO) },
+        { name: "HKDF", hash: "SHA-256", salt: encoder.encode(binding), info: encoder.encode(SESSION_INFO) },
         material, { name: "AES-GCM", length: 256 }, false, [usage]
     )
 }
 
-function binding(user, handshake) {
-    return encoder.encode(`${user}\n${handshake}`)
+function associated(user, binding) {
+    return encoder.encode(`${user}\n${binding}`)
 }
 
-async function sealForSession(share, handshake, user, payload) {
+async function sealForSession(share, binding, user, payload) {
     const nonce = random(NONCE_LENGTH)
     const sealed = await subtle.encrypt(
-        { name: "AES-GCM", iv: nonce, additionalData: binding(user, handshake) },
-        await sessionKey(share, handshake, "encrypt"), encoder.encode(payload)
+        { name: "AES-GCM", iv: nonce, additionalData: associated(user, binding) },
+        await sessionKey(share, binding, "encrypt"), encoder.encode(payload)
     )
     return encode(concat(nonce, new Uint8Array(sealed)))
 }
 
-async function openForSession(share, handshake, user, sealed) {
+async function openForSession(share, binding, user, sealed) {
     const raw = decode(sealed)
     const plain = await subtle.decrypt(
-        { name: "AES-GCM", iv: raw.slice(0, NONCE_LENGTH), additionalData: binding(user, handshake) },
-        await sessionKey(share, handshake, "decrypt"), raw.slice(NONCE_LENGTH)
+        { name: "AES-GCM", iv: raw.slice(0, NONCE_LENGTH), additionalData: associated(user, binding) },
+        await sessionKey(share, binding, "decrypt"), raw.slice(NONCE_LENGTH)
     )
     return decoder.decode(plain)
 }
@@ -339,10 +341,12 @@ export function hash() {
 }
 
 export function supported() {
-    support ??= Promise.all([
-        subtle.generateKey({ name: "X25519" }, false, ["deriveBits"]),
-        subtle.generateKey({ name: "Ed25519" }, false, ["sign", "verify"])
-    ]).then(() => typeof indexedDB !== "undefined").catch(() => false)
+    support ??= Promise.resolve()
+        .then(() => Promise.all([
+            subtle.generateKey({ name: "X25519" }, false, ["deriveBits"]),
+            subtle.generateKey({ name: "Ed25519" }, false, ["sign", "verify"])
+        ]))
+        .then(() => typeof indexedDB !== "undefined").catch(() => false)
     return support
 }
 
@@ -387,7 +391,7 @@ export async function forget(user) {
 }
 
 export async function begin() {
-    if (!await supported()) throw new Error("This browser cannot run the handshake.")
+    if (!await supported()) throw new Error("This browser cannot run the key exchange.")
     await reset()
 
     const pair = await subtle.generateKey({ name: "X25519" }, false, ["deriveBits"])
@@ -396,12 +400,16 @@ export async function begin() {
     return { key, hash: await hash() }
 }
 
-export function link({ signature, origin, handshake, key, hash }) {
-    const query = new URLSearchParams({ v: "1", sig: signature, origin, id: handshake, hash, key })
-    return `${QR_SCHEME}://handshake?${query}`
+export function link({ kind, origin, id, key, scripts }) {
+    const query = new URLSearchParams({ v: QR_VERSION, origin, id, key })
+    for (const [artifact, name] of QR_SCRIPTS) query.set(name, scripts[artifact].hash)
+    for (const [artifact, name] of QR_SCRIPTS) {
+        if (scripts[artifact].version) query.set(`${name}_v`, scripts[artifact].version)
+    }
+    return `${QR_SCHEME}://${kind}?${query}`
 }
 
-export async function accept({ payload, share, handshake, user, expires }) {
+export async function accept({ payload, share, binding, user, expires }) {
     const pair = await read("pair")
     if (!pair || !payload || !share) {
         await reset()
@@ -411,8 +419,8 @@ export async function accept({ payload, share, handshake, user, expires }) {
     try {
         accountKey = await importAccountKey(await openWrapped(pair, payload))
         await write("account", {
-            handshake, user,
-            sealed: await sealForSession(share, handshake, user, payload),
+            binding, user,
+            sealed: await sealForSession(share, binding, user, payload),
             expires: Date.now() + expires * 1000
         })
         return true
@@ -422,20 +430,20 @@ export async function accept({ payload, share, handshake, user, expires }) {
     }
 }
 
-export async function unlock({ share, handshake, user }) {
-    if (accountKey && await read("account").then(record => record?.handshake === handshake).catch(() => false)) {
+export async function unlock({ share, binding, user }) {
+    if (accountKey && await read("account").then(record => record?.binding === binding).catch(() => false)) {
         return true
     }
     accountKey = null
 
     try {
         const [record, pair] = [await read("account"), await read("pair")]
-        if (!share || !record || !pair || record.handshake !== handshake || record.user !== user
+        if (!share || !record || !pair || record.binding !== binding || record.user !== user
             || record.expires < Date.now()) {
             throw new Error("The keystore does not belong to this session.")
         }
 
-        const payload = await openForSession(share, handshake, user, record.sealed)
+        const payload = await openForSession(share, binding, user, record.sealed)
         accountKey = await importAccountKey(await openWrapped(pair, payload))
         return true
     } catch {
@@ -597,7 +605,7 @@ async function guard() {
     if (!response || response.status === 429 || response.status >= 500) return
 
     const state = response.ok ? await response.json().catch(() => null) : null
-    if (!state?.share || state.handshake !== record.handshake || state.user_id !== record.user) await reset()
+    if (!state?.share || state.binding !== record.binding || state.user_id !== record.user) await reset()
 }
 
 channel?.addEventListener("message", event => {

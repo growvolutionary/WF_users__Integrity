@@ -7,8 +7,8 @@
       "versions": [
         {
           "file": "e2ee/v1.js",
-          "sha256": "c1c7acb24f5d304f9167327552834cc7140dfbafd87c0a4a1de31672a5bfdd0b",
-          "size": 23754,
+          "sha256": "500fd8e45f13de41519290956e1733d1f8dcb6870b161d6ea652ad7cb2579f0e",
+          "size": 24075,
           "version": "v1"
         }
       ]
@@ -19,8 +19,8 @@
       "versions": [
         {
           "file": "session/v1.js",
-          "sha256": "7347dc8fe4ff90ea0d43b47c0f5bd01ee5357d54308df09e9dcbb7ce139e4132",
-          "size": 3642,
+          "sha256": "eeb5ac48bbe6d4d05e4ecd39432caac2968a1d163297be98a72c2061c59726f3",
+          "size": 3636,
           "version": "v1"
         }
       ]

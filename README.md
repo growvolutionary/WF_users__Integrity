@@ -31,10 +31,11 @@ compare it with the script the host actually serves.
 
 ## What the hashes prove
 
-A matching hash proves that a host serves the bytes published here — nothing more. The mobile SDK pins
-the hash of `e2ee.js` alone; `session.js` holds no key material and only hands the server's session share
-to `e2ee.js`. It does not prove
-that the published code is free of bugs, and it cannot prove what a host does on its server side.
+A matching hash proves that a host serves the bytes published here — nothing more. Every QR code a
+browser shows for a handshake or a link carries the hashes and versions of both scripts; the mobile SDK
+accepts them when the host's peers confirm them, or — without peers — when its release pins them (a map
+from version to hash per script). It does not prove that the published code is free of bugs, and it
+cannot prove what a host does on its server side.
 A host that serves an older version than `latest` is reported as *outdated*, one that serves bytes
 that match no version as a *reference mismatch*.
 
