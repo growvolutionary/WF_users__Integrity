@@ -7,8 +7,32 @@
       "versions": [
         {
           "file": "e2ee/v1.js",
+          "http": {
+            "sha256": "500fd8e45f13de41519290956e1733d1f8dcb6870b161d6ea652ad7cb2579f0e",
+            "sha384": "c88e7d12b9f73028a793d54c479636786a5613c6249a81742823d263305165dbe9b6aebf7deee719b6095caa3d68170c",
+            "size": 24075,
+            "sri": "sha384-yI59Ern3MCink9VMR5Y2eGpWE8YkmoF0KCPSYzBRZdvptq6/fe7nGbYJXKo9aBcM"
+          },
           "sha256": "500fd8e45f13de41519290956e1733d1f8dcb6870b161d6ea652ad7cb2579f0e",
           "size": 24075,
+          "version": "v1"
+        }
+      ]
+    },
+    "users_e2ee_provider": {
+      "latest": "v1",
+      "path": "e2ee-provider",
+      "versions": [
+        {
+          "file": "e2ee-provider/v1.js",
+          "http": {
+            "sha256": "a14e23d3cf80778ef2f152019b4a6b18967e9f906c9c94e4b05889209372532d",
+            "sha384": "94e0606039d0d021dfa0695df8a18e859686d5eba59a1e58f114a44ebee053d0f7dc4382a3527492a3deb572d2943ff7",
+            "size": 6773,
+            "sri": "sha384-lOBgYDnQ0CHfoGld+KGOhZaG1eulmh5Y8RSkTr7gU9D33EOCo1J0kqPetXLSlD/3"
+          },
+          "sha256": "a14e23d3cf80778ef2f152019b4a6b18967e9f906c9c94e4b05889209372532d",
+          "size": 6773,
           "version": "v1"
         }
       ]
@@ -19,6 +43,12 @@
       "versions": [
         {
           "file": "session/v1.js",
+          "http": {
+            "sha256": "eeb5ac48bbe6d4d05e4ecd39432caac2968a1d163297be98a72c2061c59726f3",
+            "sha384": "4b0a5807f4736808673ec5d809ab3e1f0ebf06849fa9c5c759fc00fc59d92206df99580f3c138af15dbf91b637949acd",
+            "size": 3636,
+            "sri": "sha384-SwpYB/RzaAhnPsXYCas+Hw6/BoSfqcXHWfwA/FnZIgbfmVgPPBOK8V2/kbY3lJrN"
+          },
           "sha256": "eeb5ac48bbe6d4d05e4ecd39432caac2968a1d163297be98a72c2061c59726f3",
           "size": 3636,
           "version": "v1"
@@ -31,8 +61,14 @@
       "versions": [
         {
           "file": "uploads/v1.js",
-          "sha256": "084a75ca58a28d41ed8987ec2321bcce404856fd3b73ca5fc619f8f7308f4cb4",
-          "size": 28240,
+          "http": {
+            "sha256": "94439b54d3e31bfe532d19617e450b17a2dad5a63f261d1b9860a6a6ed684a7e",
+            "sha384": "c80766132dc3642e81c607e46d6e0f3816bb8d5b55db684521bae2a958e110d68c22c96956914a80418897a111cdd23a",
+            "size": 28599,
+            "sri": "sha384-yAdmEy3DZC6BxgfkbW4POBa7jVtV22hFIbriqVjhENaMIslpVpFKgEGIl6ERzdI6"
+          },
+          "sha256": "94439b54d3e31bfe532d19617e450b17a2dad5a63f261d1b9860a6a6ed684a7e",
+          "size": 28599,
           "version": "v1"
         }
       ]
@@ -43,6 +79,12 @@
       "versions": [
         {
           "file": "vodozemac/0.1.0/vodozemac_bg.js",
+          "http": {
+            "sha256": "e061366aee4f476031d7225f755b35cfdac66a6339057f98d6baa1435f8c3411",
+            "sha384": "26d23df737b8ed3948ce2994297b1e232cdc7f29c355b5cca346db50a8a9e91af0ce618712e9b59dc5ec9304dc972455",
+            "size": 44755,
+            "sri": "sha384-JtI99ze47TlIzimUKXseIyzcfynDVbXMo0bbUKip6RrwzmGHEum1ncXskwTclyRV"
+          },
           "sha256": "e061366aee4f476031d7225f755b35cfdac66a6339057f98d6baa1435f8c3411",
           "size": 44755,
           "version": "0.1.0"
@@ -55,6 +97,12 @@
       "versions": [
         {
           "file": "vodozemac/0.1.0/vodozemac_bg.wasm",
+          "http": {
+            "sha256": "5b3a606864bbcfe31f4e91f12e73b659c494f6d13c36cb6e1ec94dce992410fd",
+            "sha384": "60365bdfdd7609f3feba7f4e2df5f55646d53b74aa96f0a81bfb02e58926bf28886b9ebbe65b7e5de1547146c6aab8fc",
+            "size": 639474,
+            "sri": "sha384-YDZb3912CfP+un9OLfX1VkbVO3SqlvCoG/sC5YkmvyiIa5675lt+XeFUcUbGqrj8"
+          },
           "sha256": "5b3a606864bbcfe31f4e91f12e73b659c494f6d13c36cb6e1ec94dce992410fd",
           "size": 639474,
           "version": "0.1.0"
@@ -63,5 +111,6 @@
     }
   },
   "format": 2,
+  "http": "http covers the exact bytes a host serves and a browser checks with Subresource Integrity: text artifacts are served with LF line endings, binary artifacts byte for byte. A client compares bytes it fetched over HTTP only with http, never with the normalized sha256.",
   "normalization": "Hashes cover the content as stored in git: in text artifacts CRLF line endings count as LF, binary artifacts (.wasm) are hashed byte for byte."
 }

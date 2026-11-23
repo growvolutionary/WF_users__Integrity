@@ -1,5 +1,6 @@
 e2ee/*.js text eol=lf
 session/*.js text eol=lf
 uploads/*.js text eol=lf
+e2ee-provider/*.js text eol=lf
 vodozemac/*/*.js text eol=lf
 *.wasm binary

@@ -1,5 +1,5 @@
 from pathlib import Path
-import hashlib, json, re
+import base64, hashlib, json, re
 
 ROOT = Path(__file__).resolve().parent
 MANIFEST = ROOT / "manifest.json"
@@ -10,11 +10,25 @@ ARTIFACTS = {
     "users_e2ee": ("e2ee", None, False),
     "users_session": ("session", None, False),
     "users_uploads": ("uploads", None, False),
+    "users_e2ee_provider": ("e2ee-provider", None, False),
     "users_vodozemac": ("vodozemac", "vodozemac_bg.js", False),
     "users_vodozemac_wasm": ("vodozemac", "vodozemac_bg.wasm", True)
 }
 NORMALIZATION = ("Hashes cover the content as stored in git: in text artifacts CRLF line endings count as LF, "
                  "binary artifacts (.wasm) are hashed byte for byte.")
+SERVED = ("http covers the exact bytes a host serves and a browser checks with Subresource Integrity: text "
+          "artifacts are served with LF line endings, binary artifacts byte for byte. A client compares bytes it "
+          "fetched over HTTP only with http, never with the normalized sha256.")
+
+
+def _http(data: bytes) -> dict:
+    sha384 = hashlib.sha384(data).digest()
+    return {
+        "sha256": hashlib.sha256(data).hexdigest(),
+        "sha384": sha384.hex(),
+        "sri": "sha384-" + base64.b64encode(sha384).decode("ascii"),
+        "size": len(data)
+    }
 
 
 def _sha256_file(path: Path, binary: bool) -> tuple[str, int]:
@@ -61,7 +75,8 @@ def _artifact(artifact: str, directory: Path, name: str | None, binary: bool) ->
             "version": version,
             "file": file.relative_to(ROOT).as_posix(),
             "sha256": digest,
-            "size": size
+            "size": size,
+            "http": _http(file.read_bytes() if binary else file.read_bytes().replace(b"\r\n", b"\n"))
         })
 
     return {
@@ -76,6 +91,7 @@ def main():
         "format": 2,
         "algorithm": "sha256",
         "normalization": NORMALIZATION,
+        "http": SERVED,
         "artifacts": {
             artifact: _artifact(artifact, ROOT / directory, name, binary)
             for artifact, (directory, name, binary) in ARTIFACTS.items()

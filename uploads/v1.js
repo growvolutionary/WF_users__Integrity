@@ -677,18 +677,25 @@ export async function unshare(id) {
 }
 
 function reveal(image) {
-    const declared = image.getAttribute("data-users-upload")
-    const path = uploadPath(declared ?? image.getAttribute("src"))
+    const id = image.getAttribute("data-users-upload-id")
+    const declared = image.getAttribute("data-users-upload") ?? image.getAttribute("src")
+    const path = id && /^\d+$/.test(id) ? `id:${id}` : uploadPath(declared)
     if (!path || image.dataset.usersRevealed === path) return
     image.dataset.usersRevealed = path
-    resolve(declared ?? image.getAttribute("src")).then(url => {
-        if (image.dataset.usersRevealed === path && image.getAttribute("src") !== url) image.src = url
-    }).catch(() => image.dispatchEvent(new Event("users:upload-error")))
+    const loading = path.startsWith("id:") ? open({ id: Number(id) }) : resolve(declared)
+    loading.then(url => {
+        if (image.dataset.usersRevealed !== path) return
+        if (image.getAttribute("src") !== url) image.src = url
+        image.dataset.usersLoaded = "true"
+    }).catch(() => {
+        if (image.dataset.usersRevealed === path) delete image.dataset.usersRevealed
+        image.dispatchEvent(new Event("users:upload-error"))
+    })
 }
 
 function scan(root) {
     if (root instanceof HTMLImageElement) return reveal(root)
-    root.querySelectorAll?.(`img[src*="${FILES}"], img[data-users-upload]`).forEach(reveal)
+    root.querySelectorAll?.(`img[src*="${FILES}"], img[data-users-upload], img[data-users-upload-id]`).forEach(reveal)
 }
 
 function watch() {
@@ -699,7 +706,7 @@ function watch() {
             else record.addedNodes.forEach(node => node.nodeType === 1 && scan(node))
         }
     }).observe(document.documentElement, {
-        subtree: true, childList: true, attributes: true, attributeFilter: ["src", "data-users-upload"]
+        subtree: true, childList: true, attributes: true, attributeFilter: ["src", "data-users-upload", "data-users-upload-id"]
     })
 }
 
