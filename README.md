@@ -1,27 +1,40 @@
-# Static e2ee.js and session.js integrity
+# Static users script integrity
 
-This repository contains the version history of the two static JavaScript files the `users` Additive
-serves for its end-to-end encryption — `e2ee.js`, which holds all cryptography, and `session.js`, which
-unlocks the account key for a session — with their original source and correlating hashes.
+This repository contains the version history of the static JavaScript files the `users` Additive
+serves for its end-to-end encryption — among them `e2ee.js`, which holds the account key, and
+`session.js`, which unlocks it for a session — with their original source and correlating hashes.
 
 ## Contents
 
-| Path              | Meaning                                                                                                                |
-|-------------------|------------------------------------------------------------------------------------------------------------------------|
-| `e2ee/v<N>.js`    | The published source of every version of `static/js/e2ee.js` (artifact `users_e2ee`).                                  |
-| `session/v<N>.js` | The published source of every version of `static/js/session.js` (artifact `users_session`).                            |
-| `generate.py`     | Computes the SHA-256 of every version and writes `manifest.json` (and `<artifact>/hashes/`).                           |
-| `manifest.json`   | The public reference, format 2: per artifact one entry per version (`version`, `file`, `sha256`, `size`) and `latest`. |
-| `.gitattributes`  | Pins `e2ee/*.js` and `session/*.js` to LF, so a checkout on any platform hashes to the same value.                     |
+| Path                      | Meaning                                                                                                                |
+|---------------------------|------------------------------------------------------------------------------------------------------------------------|
+| `<script>/v<N>.js`        | The published source of every version of `static/js/<script>.js` (artifact `users_<script>`, `-` written as `_`).      |
+| `e2ee/v<N>.js`            | `e2ee.js`: account key, browser link, encryption of personal data (`users_e2ee`).                                      |
+| `session/v<N>.js`         | `session.js`: unlocks the account key for a session (`users_session`).                                                 |
+| `uploads/v<N>.js`         | `uploads.js`: upload encryption and public pools (`users_uploads`).                                                    |
+| `e2ee-provider/v<N>.js`   | `e2ee-provider.js`: the account key as end-to-end encryption provider (`users_e2ee_provider`).                         |
+| `party/v<N>.js`           | `party.js`: the own profile as a party, decrypted on the device (`users_party`).                                       |
+| `olm/v<N>.js`             | `olm.js`: the browser's device identity and encrypted message delivery (`users_olm`).                                  |
+| `vodozemac/<release>/`    | The vendored vodozemac bindings and WebAssembly module (`users_vodozemac`, `users_vodozemac_wasm`).                    |
+| `generate.py`             | Computes the SHA-256 of every version and writes `manifest.json` (and `<artifact>/hashes/`).                           |
+| `sync.py`                 | Maintainer step: copies the served scripts of the Additive next to this repository and runs `generate.py`.             |
+| `manifest.json`           | The public reference, format 2: per artifact one entry per version (`version`, `file`, `sha256`, `size`) and `latest`. |
+| `.gitattributes`          | Pins every `.js` file to LF, so a checkout on any platform hashes to the same value.                                   |
 
 `generate.py` hashes the content as stored in git: CRLF line endings count as LF, so a clone made
-before `.gitattributes` existed still reproduces the published value. The output is deterministic and
-carries no timestamps; running it twice produces identical files. The `hashes/` folders are a local
-by-product and not committed, `manifest.json` is.
+before `.gitattributes` existed still reproduces the published value. Every folder with `v<N>.js` files
+is an artifact. The output is deterministic and carries no timestamps; running it twice produces
+identical files. The `hashes/` folders are a local by-product and not committed, `manifest.json` is.
 
 ```bash
 python generate.py
+python -m pytest -q tests
 ```
+
+The Additive lists its integrity scripts in `IntegrityService.SCRIPTS`. With this repository checked out
+as `integrity/` inside the Additive, `python -I sync.py` copies each listed script into the latest open
+version of its folder (`v1.js` for a new script), regenerates `manifest.json` and writes the pins of the
+mobile SDK. A version listed in `FROZEN` is never rewritten; a changed script then becomes `v<N+1>.js`.
 
 The `users` Additive clones this repository, runs `generate.py` exactly once per integrity run as a
 subprocess of its own interpreter, recomputes every hash itself and only reports versions whose hashes

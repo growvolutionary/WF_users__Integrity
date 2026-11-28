@@ -2,12 +2,15 @@
  *                                                                  *
  *    Copyright © 2026 GrowVolution Media, Inh. Pierre Schkoldow    *
  *                                                                  *
- *            This script provides the privacy features             *
- *    of the WebFluid "users" Additive. To keep your application    *
- *    transparent and secure, you should not edit or change it's    *
- *     content by yourself. Additionaly we highly recommend to      *
- *    add the "peering" Additive to your application and to not     *
- *          remove the "users" Additives peering features.          *
+ *       This script manages the account key of the WebFluid        *
+ *     "users" Additive on your device: it enrols and recovers      *
+ *    the key, links this browser to your phone and encrypts and    *
+ *        decrypts your personal data locally. To keep your         *
+ *    application transparent and secure, you should not edit or    *
+ *      change its content by yourself. Additionally we highly      *
+ *         recommend to add the "peering" Additive to your          *
+ *       application and to not remove the "users" Additive's       *
+ *                        peering features.                         *
  *                                                                  *
  ********************************************************************/
 

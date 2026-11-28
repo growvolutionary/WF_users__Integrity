@@ -1,3 +1,19 @@
+/********************************************************************
+ *                                                                  *
+ *    Copyright © 2026 GrowVolution Media, Inh. Pierre Schkoldow    *
+ *                                                                  *
+ *    This script offers the account key of the WebFluid "users"    *
+ *     Additive as an end-to-end encryption provider: it wraps      *
+ *    and unwraps the keys of other parts of your application on    *
+ *    your device, bound to the context they name. To keep your     *
+ *    application transparent and secure, you should not edit or    *
+ *      change its content by yourself. Additionally we highly      *
+ *         recommend to add the "peering" Additive to your          *
+ *       application and to not remove the "users" Additive's       *
+ *                        peering features.                         *
+ *                                                                  *
+ ********************************************************************/
+
 const SOURCE = import.meta.url
 const PREFIX = new URL(SOURCE).pathname.replace(/\/static\/js\/e2ee-provider\.js$/, "")
 

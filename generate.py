@@ -6,11 +6,8 @@ MANIFEST = ROOT / "manifest.json"
 CHUNK_SIZE = 1024 * 1024
 SCRIPT = re.compile(r"^v(\d+)$")
 RELEASE = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
-ARTIFACTS = {
-    "users_e2ee": ("e2ee", None, False),
-    "users_session": ("session", None, False),
-    "users_uploads": ("uploads", None, False),
-    "users_e2ee_provider": ("e2ee-provider", None, False),
+PREFIX = "users_"
+RELEASES = {
     "users_vodozemac": ("vodozemac", "vodozemac_bg.js", False),
     "users_vodozemac_wasm": ("vodozemac", "vodozemac_bg.wasm", True)
 }
@@ -86,6 +83,20 @@ def _artifact(artifact: str, directory: Path, name: str | None, binary: bool) ->
     }
 
 
+def artifact_id(folder: str) -> str:
+    return PREFIX + folder.replace("-", "_")
+
+
+def scripts() -> dict:
+    folders = [folder for folder in ROOT.iterdir()
+               if folder.is_dir() and any(SCRIPT.match(file.stem) for file in folder.glob("*.js"))]
+    return {artifact_id(folder.name): (folder.name, None, False) for folder in sorted(folders)}
+
+
+def artifacts() -> dict:
+    return {**scripts(), **RELEASES}
+
+
 def main():
     manifest = {
         "format": 2,
@@ -94,7 +105,7 @@ def main():
         "http": SERVED,
         "artifacts": {
             artifact: _artifact(artifact, ROOT / directory, name, binary)
-            for artifact, (directory, name, binary) in ARTIFACTS.items()
+            for artifact, (directory, name, binary) in artifacts().items()
         }
     }
     with open(MANIFEST, "w", encoding="utf-8", newline="\n") as f:
